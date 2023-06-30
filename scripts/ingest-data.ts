@@ -6,7 +6,9 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 
-/* Name of directory to retrieve your files from 
+// this file converts the PDF files in the 'docs' folder into embeddings and stores them in the Pinecone vector store
+
+/* Name of directory to retrieve your files from
    Make sure to add your PDF files inside the 'docs' folder
 */
 const filePath = 'docs';
