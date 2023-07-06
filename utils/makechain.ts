@@ -1,6 +1,7 @@
 import { OpenAI } from 'langchain/llms/openai';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
+import { PineconeStore } from 'langchain/vectorstores';
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -19,7 +20,7 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = (vectorstore: Chroma ) => {
+export const makeChain = (vectorstore: Chroma | PineconeStore ) => {
 
   const model = new OpenAI({ // model to use with the chat interaction
     temperature: 0, // increase temperature to get more creative answers
