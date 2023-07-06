@@ -12,6 +12,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function Home() {
   const [query, setQuery] = useState<string>('');
@@ -19,29 +21,31 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [messageState, setMessageState] = useState<{
     messages: Message[];
-    pending?: string;
-    history: [string, string][];
-    pendingSourceDocs?: Document[];
+    history: [string, string][]; // chat history
+    sourceDocs?: Document[];
   }>({
-    messages: [
+    messages: [ // default message in ui
       {
-        message: 'Hi, what would you like to learn about this document?',
+        message: 'Hi, what would you like to learn?',
         type: 'apiMessage',
       },
     ],
-    history: [],
+    history: [], // initial history is empty
+    sourceDocs: [], // initial source docs is empty
   });
 
-  const { messages, history } = messageState;
+  const { messages, history, sourceDocs } = messageState;
 
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     textAreaRef.current?.focus();
   }, []);
 
-  //handle form submission
+  //handle form submission for chat
   async function handleSubmit(e: any) {
     e.preventDefault();
 
@@ -53,10 +57,10 @@ export default function Home() {
     }
 
     const question = query.trim(); // user asks question
-
+// create a new message that contains the user's question and add it to the message state
     setMessageState((state) => ({
-      ...state,
-      messages: [
+      ...state, // passing the  previous state, initially it's the default message, and history is empty
+      messages: [ // adding the new user message with the user question to the messages array
         ...state.messages,
         {
           type: 'userMessage',
@@ -65,42 +69,47 @@ export default function Home() {
       ],
     }));
 
-    setLoading(true);
-    setQuery('');
+    setLoading(true); // set loading to true while we wait for the response from the api for displaying the loading spinner
+    setQuery(''); // reset the query to empty string to allow the user to ask another question
 
+ // send the JSON stringified version of the user question to the /api/chat
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question,
-          history,
-        }),
-      });
-      const data = await response.json();
-      console.log('data', data);
-
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setMessageState((state) => ({
-          ...state,
-          messages: [
-            ...state.messages,
-            {
-              type: 'apiMessage',
-              message: data.text,
-              sourceDocs: data.sourceDocuments,
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          ],
-          history: [...state.history, [question, data.text]],
-        }));
-      }
-      console.log('messageState', messageState);
+            body: JSON.stringify({ // send credentials and the user question and history to the api
+              question,
+              history,
+            }),
+          });
+          const data = await response.json(); // get the response (answer to the user question) from the api/chat, return it to javascript object
+          console.log('data', data);
 
-      setLoading(false);
+          if (data.error) { // if there is an error, display the error message
+            toast({
+              title: 'Something went wrong',
+              description: data.error,
+              variant: 'destructive',
+            });
+          } else { // if there is no error, add the answer to the message state
+            setMessageState((state) => ({ // new message state
+              ...state, // previous state
+              messages: [ // add the new message to the messages array
+                ...state.messages, // previous messages
+                {
+                  type: 'apiMessage', // type of the message
+                  message: data.text, // the text answer to the user question
+                  sourceDocs: data.sourceDocuments, // the source documents that the answer was extracted from, displayed in UI
+                },
+              ],
+              history: [...state.history, [question, data.text]], // history combines the previous history and the new history, which includes the question and the answer text
+            }));
+          }
+          console.log('messageState', messageState);
+
+          setLoading(false); // set loading to false after we get the response from the api
 
       //scroll to bottom
       messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
@@ -125,7 +134,7 @@ export default function Home() {
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
           <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
-            GPT4 PDF Chatbot Langchain Pinecone
+            Chat with Data
           </h1>
           <main className={styles.main}>
             <div className={styles.cloud}>
@@ -224,7 +233,7 @@ export default function Home() {
                     placeholder={
                       loading
                         ? 'Waiting for response...'
-                        : 'What is this legal case about?'
+                        : 'Ask a question...'
                     }
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -260,11 +269,7 @@ export default function Home() {
             )}
           </main>
         </div>
-        <footer className="m-auto p-4">
-          <a href="https://twitter.com/mayowaoshin">
-            Powered by LangChainAI. Demo built by Mayo (Twitter: @mayowaoshin).
-          </a>
-        </footer>
+
       </Layout>
     </>
   );

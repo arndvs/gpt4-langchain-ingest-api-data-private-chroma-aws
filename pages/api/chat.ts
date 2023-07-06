@@ -9,9 +9,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history } = req.body;
+  const { question, history } = req.body; // extract question and history from the request body
 
-  console.log('question', question);
+  console.log('question', question, 'history', history);
 
   //only accept post requests
   if (req.method !== 'POST') {
@@ -26,28 +26,31 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
+    // Create the index
     const index = pinecone.Index(PINECONE_INDEX_NAME);
 
     /* create vectorstore*/
     const vectorStore = await PineconeStore.fromExistingIndex(
-      new OpenAIEmbeddings({}),
+         // Create vector store from existing index
+      new OpenAIEmbeddings({}),// Create embeddings
       {
-        pineconeIndex: index,
-        textKey: 'text',
-        namespace: PINECONE_NAME_SPACE, //namespace comes from your config folder
+        pineconeIndex: index, // Pass in Pinecone index, set in config/pinecone.ts
+        textKey: 'text', // Pass in text key
+        namespace: PINECONE_NAME_SPACE, // Pass in namespace, set in config/pinecone.ts
       },
     );
 
-    //create chain
-    const chain = makeChain(vectorStore);
+    // Create a custom chain, which strips down the langchain to expose the call method | makechain is at /utils/makechain.ts
+    const chain = makeChain(vectorStore); // make the chain with the vector store and preparing the ConversationalRetrievalQAChain
+
     //Ask a question using chat history
-    const response = await chain.call({
-      question: sanitizedQuestion,
-      chat_history: history || [],
+    const response = await chain.call({ // call the chain with the question and history when the user clicks submit
+      question: sanitizedQuestion, // pass in the sanitized question
+      chat_history: history || [], // pass in the history or an empty array
     });
 
-    console.log('response', response);
-    res.status(200).json(response);
+    console.log('response', response); // log the response
+    res.status(200).json(response); // send the response back to the client (index) as json data with a 200 status code to index
   } catch (error: any) {
     console.log('error', error);
     res.status(500).json({ error: error.message || 'Something went wrong' });
