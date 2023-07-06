@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { loadVectorStore } from '@/utils/loadVectorStore';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { makeChain } from '@/utils/makechain';
+import { pinecone } from '@/utils/pinecone-client';
+import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 
 export default async function handler(
   req: NextApiRequest,
@@ -23,10 +26,19 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
-
+    // Create the index
+    const index = pinecone.Index(PINECONE_INDEX_NAME);
 
     /* create vectorstore*/
-    const vectorStore = await loadVectorStore('chroma')
+    const vectorStore = await PineconeStore.fromExistingIndex(
+         // Create vector store from existing index
+      new OpenAIEmbeddings({}),// Create embeddings
+      {
+        pineconeIndex: index, // Pass in Pinecone index, set in config/pinecone.ts
+        textKey: 'text', // Pass in text key
+        namespace: PINECONE_NAME_SPACE, // Pass in namespace, set in config/pinecone.ts
+      },
+    );
 
     // Create a custom chain, which strips down the langchain to expose the call method | makechain is at /utils/makechain.ts
     const chain = makeChain(vectorStore); // make the chain with the vector store and preparing the ConversationalRetrievalQAChain

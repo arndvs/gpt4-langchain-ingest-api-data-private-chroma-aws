@@ -1,19 +1,19 @@
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
-import { pinecone } from '@/utils/pinecone-client';
-import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
+import { Chroma } from 'langchain/vectorstores';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { ManualPDFLoader } from '@/utils/manualPDFLoader';
+import { CHROMA_NAME_SPACE } from '@/config/chroma';
+
 
     /**
-     * ingest-pinecone.ts loads the document (PDF) files in the 'docs' folder via the DirectoryLoader,
+     * ingest-chroma.ts loads the document (PDF) files in the 'docs' folder via the DirectoryLoader,
      * converts the text into chunks of text and metadata via the RecursiveCharacterTextSplitter,
      * and then creates embeddings of the chunks via OpenAIEmbeddings, converts the embeddings into
      * vectors  the OpenAIEmbeddings. The embeddings are then
-     * stored in the Pinecone vector store via the PineconeStore.
+     * stored in the chroma vector store via the chromaStore.
      *
-     * npm run ingest-pinecone to run this script
+     * npm run ingest-chroma to run this script
      *
      */
 
@@ -31,7 +31,7 @@ export const run = async () => {
      * ".docx": (path:string) => new ManualDocxLoader(path),
      */
     const directoryLoader = new DirectoryLoader(filePath, { // Directory Loader goes into 'docs', for every file in 'docs', converts them to text and metadata and puts them into a document object rawDocs.
-      '.pdf': (path) => new PDFLoader(path),
+        '.pdf': (path) => new ManualPDFLoader(path),
     });
 
     // const loader = new PDFLoader(filePath);
@@ -55,17 +55,12 @@ export const run = async () => {
       console.log('creating vector store...');
       /*create and store the embeddings in the vectorStore*/
       const embeddings = new OpenAIEmbeddings(); // takes text and converts them into numbers (vectors)
-      // create index, which is a representation of the vector store Index_Name in Pinecone
-      const index = pinecone.Index(PINECONE_INDEX_NAME); //Update index name for new ingest runs, initializes the vector database index
 
 
-    //updates the vector store with new embeddings
-    await PineconeStore.fromDocuments(docs, embeddings, {
-            // documents get passed, converted to text, turned into embeddings, inserted into the namespace of the index specified.
-        pineconeIndex: index,
-        namespace: PINECONE_NAME_SPACE,
-        textKey: 'text',
-    });
+      //embed the PDF documents
+      const vectorStore = await Chroma.fromDocuments(docs, embeddings, {
+        collectionName: CHROMA_NAME_SPACE,
+      });
   } catch (error) {
     console.log('error', error);
     throw new Error('Failed to ingest your data');
