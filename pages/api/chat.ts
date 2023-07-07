@@ -25,7 +25,7 @@ export default async function handler(
   try {
 
 
-    /* create vectorstore*/
+    /* Create the vectorstore */
     const vectorStore = await loadVectorStore('chroma')
 
     // Create a custom chain, which strips down the langchain to expose the call method | makechain is at /utils/makechain.ts

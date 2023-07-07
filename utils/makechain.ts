@@ -3,6 +3,8 @@ import { Chroma } from 'langchain/vectorstores/chroma';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { PineconeStore } from 'langchain/vectorstores';
 
+ /* This File is the "Create the chain" section of the Langchain */
+
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
 Chat History:

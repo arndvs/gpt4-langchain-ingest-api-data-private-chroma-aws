@@ -1,12 +1,13 @@
 import { Chroma } from 'langchain/vectorstores';
-import { CHROMA_NAME_SPACE } from '@/config/chroma';
+import { CHROMA_COLLECTION_NAME, CHROMA_API_GATEWAY_URL } from '@/config/chroma';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 
 export const loadChroma = async (embeddings: OpenAIEmbeddings) => {
     return await Chroma.fromExistingCollection(
         embeddings,
         {
-            collectionName: CHROMA_NAME_SPACE,
+            collectionName: CHROMA_COLLECTION_NAME,
+            url: CHROMA_API_GATEWAY_URL,
         }
     );
 }
