@@ -4,12 +4,12 @@ import { ManualPDFLoader } from '@/utils/manualPDFLoader';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { CHROMA_COLLECTION_NAME, CHROMA_API_GATEWAY_URL, CHROMA_API_TOKEN } from '@/config/chroma';
+import { ChromaClient } from 'chromadb';
 
 /* Name of directory to retrieve your files from */
 const filePath = 'docs';
 
 export const run = async () => {
-
 
 
     if (!CHROMA_API_GATEWAY_URL || !CHROMA_API_TOKEN) {
@@ -51,12 +51,16 @@ export const run = async () => {
         );
     await chroma.index?.reset();
 
+    const chromaClient = new ChromaClient({
+        path: CHROMA_API_GATEWAY_URL
+      });
+
     // Ingest documents in batches of 100
     for (let i = 0; i < docs.length; i += 100) {
       const batch = docs.slice(i, i + 100);
       await Chroma.fromDocuments(batch, embeddings, {
-        collectionName: CHROMA_COLLECTION_NAME,
-        url: CHROMA_API_GATEWAY_URL
+        // collectionName: CHROMA_COLLECTION_NAME,
+        index: chromaClient
       });
     }
   } catch (error) {
