@@ -38,39 +38,25 @@ export const run = async () => {
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
 
-    // const chromaArgs = {
-    //     collectionName: CHROMA_NAME_SPACE,
-    //     url: CHROMA_API_GATEWAY_URL,
-    //     chromaApiToken: CHROMA_API_TOKEN,
-    //   };
-    //   console.log('chromaArgs', chromaArgs);
 
-    // const chromaStoreFromClient = new Chroma(new OpenAIEmbeddings(), {
-    //     index: new ChromaClient({
-    //         // Whatever connection args you need
-    //         path: "http://localhost:8000",
-    //     }),
-    //     collectionName: "test-collection",
-    //   });
+    // let chroma = new Chroma(embeddings, { collectionName: CHROMA_COLLECTION_NAME });
+    // await chroma.index?.reset();
 
-    let chroma = new Chroma(embeddings,
-        { collectionName: CHROMA_COLLECTION_NAME, url: CHROMA_API_GATEWAY_URL
-        }
-        );
+    let chroma = new Chroma(embeddings, {
+        index: new ChromaClient({
+            // Whatever connection args you need
+            path: "http://localhost:8000",
+        }),
+        collectionName: CHROMA_COLLECTION_NAME });
     await chroma.index?.reset();
-
-    const chromaClient = new ChromaClient({
-        path: CHROMA_API_GATEWAY_URL
-      });
 
     // Ingest documents in batches of 100
     for (let i = 0; i < docs.length; i += 100) {
-      const batch = docs.slice(i, i + 100);
-      await Chroma.fromDocuments(batch, embeddings, {
-        // collectionName: CHROMA_COLLECTION_NAME,
-        index: chromaClient
-      });
-    }
+        const batch = docs.slice(i, i + 100);
+        await Chroma.fromDocuments(batch, embeddings, {
+          collectionName: CHROMA_COLLECTION_NAME,
+        });
+      }
   } catch (error) {
     console.log('error', error);
     throw new Error('Failed to ingest your data');

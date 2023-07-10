@@ -184,10 +184,7 @@ export default function Home() {
                         </div>
                       </div>
                       {message.sourceDocs && (
-                        <div
-                          className="p-5"
-                          key={`sourceDocsAccordion-${index}`}
-                        >
+        <div className="p-5" key={`sourceDocsAccordion-${index}`}>
                           <Accordion
                             type="single"
                             collapsible
