@@ -45,6 +45,14 @@ export const run = async () => {
     //   };
     //   console.log('chromaArgs', chromaArgs);
 
+    // const chromaStoreFromClient = new Chroma(new OpenAIEmbeddings(), {
+    //     index: new ChromaClient({
+    //         // Whatever connection args you need
+    //         path: "http://localhost:8000",
+    //     }),
+    //     collectionName: "test-collection",
+    //   });
+
     let chroma = new Chroma(embeddings,
         { collectionName: CHROMA_COLLECTION_NAME, url: CHROMA_API_GATEWAY_URL
         }
