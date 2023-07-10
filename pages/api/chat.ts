@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { loadVectorStore } from '@/utils/loadVectorStore';
 import { makeChain } from '@/utils/makechain';
+import { Chroma } from 'langchain/vectorstores';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { CHROMA_COLLECTION_NAME } from '@/config/chroma';
+import { ChromaClient } from 'chromadb';
 
 export default async function handler(
   req: NextApiRequest,
@@ -26,7 +30,17 @@ export default async function handler(
 
 
     /* Create the vectorstore */
-    const vectorStore = await loadVectorStore('chroma')
+    // const vectorStore = await loadVectorStore('chroma')
+    const vectorStore = await Chroma.fromExistingCollection(
+        new OpenAIEmbeddings({}),
+        {index: new ChromaClient({
+            // Whatever connection args you need
+            path: "http://localhost:8000",
+        }),
+          collectionName: CHROMA_COLLECTION_NAME,
+        },
+      );
+
 
     // Create a custom chain, which strips down the langchain to expose the call method | makechain is at /utils/makechain.ts
     const chain = makeChain(vectorStore); // make the chain with the vector store and preparing the ConversationalRetrievalQAChain

@@ -5,6 +5,8 @@ import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { CHROMA_COLLECTION_NAME, CHROMA_API_GATEWAY_URL, CHROMA_API_TOKEN } from '@/config/chroma';
 import { ChromaClient } from 'chromadb';
+import { CustomPDFLoader } from '@/utils/customPDFLoader';
+
 
 /* Name of directory to retrieve your files from */
 const filePath = 'docs';
@@ -19,7 +21,7 @@ export const run = async () => {
   try {
     /*load raw docs from the all files in the directory */
     const directoryLoader = new DirectoryLoader(filePath, {
-      '.pdf': (path) => new ManualPDFLoader(path),
+      '.pdf': (path) => new CustomPDFLoader(path),
     });
 
     // const loader = new PDFLoader(filePath);
@@ -54,6 +56,10 @@ export const run = async () => {
     for (let i = 0; i < docs.length; i += 100) {
         const batch = docs.slice(i, i + 100);
         await Chroma.fromDocuments(batch, embeddings, {
+            index: new ChromaClient({
+                // Whatever connection args you need
+                path: "http://localhost:8000",
+            }),
           collectionName: CHROMA_COLLECTION_NAME,
         });
       }
