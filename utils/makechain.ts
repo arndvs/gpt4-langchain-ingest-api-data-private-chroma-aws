@@ -1,4 +1,4 @@
-import { OpenAI } from 'langchain/llms/openai';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 import { PineconeStore } from 'langchain/vectorstores';
@@ -24,7 +24,7 @@ Helpful answer in markdown:`;
 
 export const makeChain = (vectorstore: Chroma | PineconeStore ) => {
 
-  const model = new OpenAI({ // model to use with the chat interaction
+  const model = new ChatOpenAI({ // model to use with the chat interaction
     temperature: 0, // increase temperature to get more creative answers
     modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access to the api
     streaming: true,

@@ -4,6 +4,7 @@ import { makeChain } from '@/utils/makechain';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { CHROMA_COLLECTION_NAME } from '@/config/chroma';
+import { AIMessage, HumanMessage } from 'langchain/schema';
 import { ChromaClient } from 'chromadb';
 
 export default async function handler(
@@ -12,7 +13,8 @@ export default async function handler(
 ) {
   const { question, history } = req.body; // extract question and history from the request body
 
-  console.log('question', question, 'history', history);
+  console.log('question', question);
+  console.log('history', history);
 
   //only accept post requests
   if (req.method !== 'POST') {
@@ -33,10 +35,11 @@ export default async function handler(
     const vectorStore = await Chroma.fromExistingCollection(
         new OpenAIEmbeddings({}),
         {
-        // @ts-ignore
+
           collectionName: CHROMA_COLLECTION_NAME,
         },
       );
+
     // const vectorStore = await Chroma.fromExistingCollection(
     //     new OpenAIEmbeddings({}),
     //     {index: new ChromaClient({
@@ -52,11 +55,19 @@ export default async function handler(
     // Create a custom chain, which strips down the langchain to expose the call method | makechain is at /utils/makechain.ts
     const chain = makeChain(vectorStore); // make the chain with the vector store and preparing the ConversationalRetrievalQAChain
 
+    const pastMessages = history.map((message: string, i: number) => {
+        if (i % 2 === 0) {
+          return new HumanMessage(message);
+        } else {
+          return new AIMessage(message);
+        }
+      });
+
     //Ask a question using chat history
     const response = await chain.call({ // call the chain with the question and history when the user clicks submit
       question: sanitizedQuestion, // pass in the sanitized question
-      chat_history: history || [], // pass in the history or an empty array
-      verbose: true
+      chat_history: pastMessages // pass in the history or an empty array
+
     });
 
     console.log('response', response); // log the response
