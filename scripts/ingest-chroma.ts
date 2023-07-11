@@ -1,6 +1,5 @@
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { ManualPDFLoader } from '@/utils/manualPDFLoader';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { CHROMA_COLLECTION_NAME, CHROMA_API_GATEWAY_URL, CHROMA_API_TOKEN } from '@/config/chroma';
@@ -14,9 +13,9 @@ const filePath = 'docs';
 export const run = async () => {
 
 
-    if (!CHROMA_API_GATEWAY_URL || !CHROMA_API_TOKEN) {
-        throw new Error('CHROMA_API_GATEWAY_URL or CHROMA_API_TOKEN is not set in the environment variables');
-      }
+    // if (!CHROMA_API_GATEWAY_URL || !CHROMA_API_TOKEN) {
+    //     throw new Error('CHROMA_API_GATEWAY_URL or CHROMA_API_TOKEN is not set in the environment variables');
+    //   }
 
   try {
     /*load raw docs from the all files in the directory */
@@ -41,25 +40,31 @@ export const run = async () => {
     const embeddings = new OpenAIEmbeddings();
 
 
-    // let chroma = new Chroma(embeddings, { collectionName: CHROMA_COLLECTION_NAME });
-    // await chroma.index?.reset();
-
-    let chroma = new Chroma(embeddings, {
-        index: new ChromaClient({
-            // Whatever connection args you need
-            path: "http://localhost:8000",
-        }),
-        collectionName: CHROMA_COLLECTION_NAME });
+    let chroma = new Chroma(embeddings, { collectionName: CHROMA_COLLECTION_NAME });
     await chroma.index?.reset();
 
+    // let chroma = new Chroma(embeddings, {
+    //     index: new ChromaClient({
+    //         // Whatever connection args you need
+    //         path: "http://localhost:8000",
+    //     }),
+    //     collectionName: CHROMA_COLLECTION_NAME });
+    // await chroma.index?.reset();
+
     // Ingest documents in batches of 100
+    // for (let i = 0; i < docs.length; i += 100) {
+    //     const batch = docs.slice(i, i + 100);
+    //     await Chroma.fromDocuments(batch, embeddings, {
+    //         index: new ChromaClient({
+    //             // Whatever connection args you need
+    //             path: "http://localhost:8000",
+    //         }),
+    //       collectionName: CHROMA_COLLECTION_NAME,
+    //     });
+    //   }
     for (let i = 0; i < docs.length; i += 100) {
         const batch = docs.slice(i, i + 100);
         await Chroma.fromDocuments(batch, embeddings, {
-            index: new ChromaClient({
-                // Whatever connection args you need
-                path: "http://localhost:8000",
-            }),
           collectionName: CHROMA_COLLECTION_NAME,
         });
       }
