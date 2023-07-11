@@ -3,7 +3,7 @@ import { loadVectorStore } from '@/utils/loadVectorStore';
 import { makeChain } from '@/utils/makechain';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { CHROMA_COLLECTION_NAME } from '@/config/chroma';
+import { CHROMA_API_GATEWAY_URL, CHROMA_COLLECTION_NAME } from '@/config/chroma';
 import { AIMessage, HumanMessage } from 'langchain/schema';
 import { ChromaClient } from 'chromadb';
 
@@ -32,24 +32,23 @@ export default async function handler(
 
 
     /* Create the vectorstore */
-    const vectorStore = await Chroma.fromExistingCollection(
-        new OpenAIEmbeddings({}),
-        {
-
-          collectionName: CHROMA_COLLECTION_NAME,
-        },
-      );
-
     // const vectorStore = await Chroma.fromExistingCollection(
     //     new OpenAIEmbeddings({}),
-    //     {index: new ChromaClient({
-    //         // Whatever connection args you need
-    //         path: "http://localhost:8000",
-    //     }),
+    //     {
 
     //       collectionName: CHROMA_COLLECTION_NAME,
     //     },
     //   );
+
+    const vectorStore = await Chroma.fromExistingCollection(
+        new OpenAIEmbeddings({}),
+        { index: new ChromaClient({
+            path: CHROMA_API_GATEWAY_URL,
+        }),
+
+          collectionName: CHROMA_COLLECTION_NAME,
+        },
+      );
 
 
     // Create a custom chain, which strips down the langchain to expose the call method | makechain is at /utils/makechain.ts

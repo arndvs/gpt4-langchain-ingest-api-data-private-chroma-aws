@@ -40,7 +40,11 @@ export const run = async () => {
     const embeddings = new OpenAIEmbeddings();
 
 
-    let chroma = new Chroma(embeddings, { collectionName: CHROMA_COLLECTION_NAME });
+    let chroma = new Chroma(embeddings, { index: new ChromaClient({
+        path: CHROMA_API_GATEWAY_URL,
+    }),
+
+      collectionName: CHROMA_COLLECTION_NAME, });
     await chroma.index?.reset();
 
     // let chroma = new Chroma(embeddings, {
@@ -65,7 +69,11 @@ export const run = async () => {
     for (let i = 0; i < docs.length; i += 100) {
         const batch = docs.slice(i, i + 100);
         await Chroma.fromDocuments(batch, embeddings, {
-          collectionName: CHROMA_COLLECTION_NAME,
+            index: new ChromaClient({
+                path: CHROMA_API_GATEWAY_URL,
+            }),
+
+              collectionName: CHROMA_COLLECTION_NAME,
         });
       }
   } catch (error) {
