@@ -54,6 +54,7 @@ export const makeChain = (vectorstore: Chroma | PineconeStore ) => {
       qaTemplate: QA_PROMPT, // combines the System Message, Context and Question together to form a Prompt
       questionGeneratorTemplate: CONDENSE_PROMPT, // question prompt plus the chat history i.e. given the following question and the previous chat history, combine them together to a stand-alone question, that is then converted to embeddings
       returnSourceDocuments: true, //The number of source documents returned is 4 by default
+      verbose: true, // verbose mode
     },
   );
 

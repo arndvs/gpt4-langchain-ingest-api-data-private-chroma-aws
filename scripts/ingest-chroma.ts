@@ -40,40 +40,38 @@ export const run = async () => {
     const embeddings = new OpenAIEmbeddings();
 
 
-    let chroma = new Chroma(embeddings, { index: new ChromaClient({
-        path: CHROMA_API_GATEWAY_URL,
-    }),
+    if (!CHROMA_API_TOKEN) {
+        throw new Error('CHROMA_API_TOKEN is not defined');
+      }
 
+      let headers = new Headers();
+      headers.append('x-api-key', CHROMA_API_TOKEN);
+
+       let chroma = new Chroma(new OpenAIEmbeddings(), {
+        index: new ChromaClient({
+            path: "https://i4zgj0jarl.execute-api.us-west-1.amazonaws.com/priv",
+            fetchOptions: {
+                headers: {
+                  'X-Api-Key': "c92013a8-a334-44478-8ffb-968807cab1b", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
+                }
+              }
+        }),
       collectionName: CHROMA_COLLECTION_NAME, });
     await chroma.index?.reset();
 
-    // let chroma = new Chroma(embeddings, {
-    //     index: new ChromaClient({
-    //         // Whatever connection args you need
-    //         path: "http://localhost:8000",
-    //     }),
-    //     collectionName: CHROMA_COLLECTION_NAME });
-    // await chroma.index?.reset();
 
-    // Ingest documents in batches of 100
-    // for (let i = 0; i < docs.length; i += 100) {
-    //     const batch = docs.slice(i, i + 100);
-    //     await Chroma.fromDocuments(batch, embeddings, {
-    //         index: new ChromaClient({
-    //             // Whatever connection args you need
-    //             path: "http://localhost:8000",
-    //         }),
-    //       collectionName: CHROMA_COLLECTION_NAME,
-    //     });
-    //   }
     for (let i = 0; i < docs.length; i += 100) {
         const batch = docs.slice(i, i + 100);
         await Chroma.fromDocuments(batch, embeddings, {
             index: new ChromaClient({
-                path: CHROMA_API_GATEWAY_URL,
+                path: "https://i4zgj0jarl.execute-api.us-west-1.amazonaws.com/priv",
+                fetchOptions: {
+                    headers: {
+                        'x-api-key': "c92013a8-a354-4478-8ffb-968807c6ab1b", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
+                    }
+                  }
             }),
-
-              collectionName: CHROMA_COLLECTION_NAME,
+          collectionName: CHROMA_COLLECTION_NAME,
         });
       }
   } catch (error) {
