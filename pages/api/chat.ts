@@ -3,7 +3,7 @@ import { loadVectorStore } from '@/utils/loadVectorStore';
 import { makeChain } from '@/utils/makechain';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { CHROMA_API_GATEWAY_URL } from '@/config/chroma';
+import { CHROMA_AWS_API_GATEWAY_URL } from '@/config/chroma';
 import { AIMessage, HumanMessage } from 'langchain/schema';
 import { ChromaClient } from 'chromadb';
 
@@ -34,7 +34,7 @@ export default async function handler(
     const vectorStore = await Chroma.fromExistingCollection(
         new OpenAIEmbeddings({}),
         { index: new ChromaClient({
-            path: CHROMA_API_GATEWAY_URL,
+            path: CHROMA_AWS_API_GATEWAY_URL,
         }),
 
           collectionName: CHROMA_COLLECTION_NAME,
