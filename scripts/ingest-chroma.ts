@@ -49,10 +49,10 @@ export const run = async () => {
 
        let chroma = new Chroma(new OpenAIEmbeddings(), {
         index: new ChromaClient({
-            path: "https://i4zgj0jarl.execute-api.us-west-1.amazonaws.com/priv",
+            path: CHROMA_API_GATEWAY_URL,
             fetchOptions: {
                 headers: {
-                  'X-Api-Key': "c92013a8-a334-44478-8ffb-968807cab1b", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
+                  'X-Api-Key': "", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
                 }
               }
         }),
@@ -64,10 +64,10 @@ export const run = async () => {
         const batch = docs.slice(i, i + 100);
         await Chroma.fromDocuments(batch, embeddings, {
             index: new ChromaClient({
-                path: "https://i4zgj0jarl.execute-api.us-west-1.amazonaws.com/priv",
+                path: CHROMA_API_GATEWAY_URL,
                 fetchOptions: {
                     headers: {
-                        'x-api-key': "c92013a8-a354-4478-8ffb-968807c6ab1b", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
+                        'x-api-key': "", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
                     }
                   }
             }),
