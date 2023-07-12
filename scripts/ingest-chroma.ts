@@ -52,7 +52,7 @@ export const run = async () => {
             path: CHROMA_API_GATEWAY_URL,
             fetchOptions: {
                 headers: {
-                  'X-Api-Key': "", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
+                  'X-Api-Key': CHROMA_API_TOKEN, // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
                 }
               }
         }),
@@ -67,7 +67,7 @@ export const run = async () => {
                 path: CHROMA_API_GATEWAY_URL,
                 fetchOptions: {
                     headers: {
-                        'x-api-key': "", // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
+                        'x-api-key': CHROMA_API_TOKEN, // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
                     }
                   }
             }),
