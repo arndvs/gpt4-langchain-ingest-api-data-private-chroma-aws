@@ -3,7 +3,7 @@ import { loadVectorStore } from '@/utils/loadVectorStore';
 import { makeChain } from '@/utils/makechain';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { CHROMA_API_GATEWAY_URL, CHROMA_COLLECTION_NAME } from '@/config/chroma';
+import { CHROMA_API_GATEWAY_URL } from '@/config/chroma';
 import { AIMessage, HumanMessage } from 'langchain/schema';
 import { ChromaClient } from 'chromadb';
 
@@ -29,16 +29,7 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
-
-
-    /* Create the vectorstore */
-    // const vectorStore = await Chroma.fromExistingCollection(
-    //     new OpenAIEmbeddings({}),
-    //     {
-
-    //       collectionName: CHROMA_COLLECTION_NAME,
-    //     },
-    //   );
+    const CHROMA_COLLECTION_NAME = 'api-data'; // change this to the name of your collection on Chroma
 
     const vectorStore = await Chroma.fromExistingCollection(
         new OpenAIEmbeddings({}),

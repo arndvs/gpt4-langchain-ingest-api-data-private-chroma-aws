@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(ts|js|tsx)\"",
     "format": "prettier --ignore-path .gitignore \"**/*.+(ts|js|tsx)\" --write",
-    "ingest-chroma": "tsx -r dotenv/config scripts/ingest-chroma.ts",
+    "ingest-chroma-via-pdf": "tsx -r dotenv/config scripts/ingest-chroma-via-pdf.ts",
+    "ingest-chroma-via-api": "tsx -r dotenv/config scripts/ingest-chroma-via-api.ts",
     "ingest-pinecone": "tsx -r dotenv/config scripts/ingest-pinecone.ts"
   },
   "dependencies": {

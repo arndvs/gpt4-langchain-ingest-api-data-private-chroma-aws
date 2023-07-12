@@ -2,7 +2,7 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { Chroma } from 'langchain/vectorstores/chroma';
-import { CHROMA_COLLECTION_NAME, CHROMA_API_GATEWAY_URL, CHROMA_API_TOKEN } from '@/config/chroma';
+import { CHROMA_API_GATEWAY_URL, CHROMA_API_TOKEN } from '@/config/chroma';
 import { ChromaClient } from 'chromadb';
 import { CustomPDFLoader } from '@/utils/customPDFLoader';
 
@@ -13,9 +13,9 @@ const filePath = 'docs';
 export const run = async () => {
 
 
-    // if (!CHROMA_API_GATEWAY_URL || !CHROMA_API_TOKEN) {
-    //     throw new Error('CHROMA_API_GATEWAY_URL or CHROMA_API_TOKEN is not set in the environment variables');
-    //   }
+    if (!CHROMA_API_GATEWAY_URL || !CHROMA_API_TOKEN) {
+        throw new Error('CHROMA_API_GATEWAY_URL or CHROMA_API_TOKEN is not set in the environment variables');
+      }
 
   try {
     /*load raw docs from the all files in the directory */
@@ -39,6 +39,7 @@ export const run = async () => {
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
 
+    const CHROMA_COLLECTION_NAME = 'api-data'; // change this to the name of your collection on Chroma
 
     if (!CHROMA_API_TOKEN) {
         throw new Error('CHROMA_API_TOKEN is not defined');
