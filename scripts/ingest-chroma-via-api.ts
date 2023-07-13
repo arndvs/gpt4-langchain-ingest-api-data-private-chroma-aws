@@ -5,7 +5,7 @@ import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { CHROMA_AWS_API_GATEWAY_URL, CHROMA_AWS_API_TOKEN, CHROMA_AXIOS_API_TOKEN, CHROMA_AXIOS_API_URL } from '@/config/chroma';
 import { ChromaClient } from 'chromadb';
-import { CustomPDFLoader } from '@/utils/customPDFLoader';
+
 
 export const run = async () => {
 
@@ -33,17 +33,14 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
       chunkOverlap: 200,
     });
 
-    const data = await textSplitter.splitDocuments(responseData);
-    console.log('split docs', data);
+    const docs = await textSplitter.splitDocuments(responseData);
+    console.log('split docs', docs);
 
     console.log('creating vector store...');
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
 
     const CHROMA_COLLECTION_NAME = `${responseData?.store ?? 'store'} axios-api-data`; // change this to the name of your collection on Chroma
-
-      let headers = new Headers();
-      headers.append('x-api-key', CHROMA_AWS_API_TOKEN);
 
        let chroma = new Chroma(new OpenAIEmbeddings(), {
         index: new ChromaClient({
@@ -57,8 +54,8 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
       collectionName: CHROMA_COLLECTION_NAME, });
     await chroma.index?.reset();
 
-    for (let i = 0; i < data.length; i += 100) {
-        const batch = data.slice(i, i + 100);
+    for (let i = 0; i < docs.length; i += 100) {
+        const batch = docs.slice(i, i + 100);
         await Chroma.fromDocuments(batch, embeddings, {
             index: new ChromaClient({
                 path: CHROMA_AWS_API_GATEWAY_URL,

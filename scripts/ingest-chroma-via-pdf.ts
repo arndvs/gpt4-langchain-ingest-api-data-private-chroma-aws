@@ -45,9 +45,6 @@ export const run = async () => {
         throw new Error('CHROMA_AWS_API_TOKEN is not defined');
       }
 
-      let headers = new Headers();
-      headers.append('x-api-key', CHROMA_AWS_API_TOKEN);
-
        let chroma = new Chroma(new OpenAIEmbeddings(), {
         index: new ChromaClient({
             path: CHROMA_AWS_API_GATEWAY_URL,
