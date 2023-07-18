@@ -36,7 +36,6 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
     const responseJsonString = JSON.stringify(responseData);
     console.log('response', responseJsonString);
 
-    // const docs = await textSplitter.splitDocuments(rawDocs); // splitting the document
     const docs = await textSplitter.createDocuments(responseJsonString); // creating the document from the response data
     console.log('docs', docs, 'end docs'    )
 
