@@ -2,10 +2,8 @@ import axios from 'axios';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { Chroma } from 'langchain/vectorstores/chroma';
-import { CHROMA_AWS_API_GATEWAY_URL, CHROMA_AWS_API_TOKEN, CHROMA_AXIOS_API_TOKEN, CHROMA_AXIOS_API_URL } from '@/config/chroma';
+import { CHROMA_AWS_API_GATEWAY_URL, CHROMA_AWS_API_TOKEN, CHROMA_AXIOS_API_TOKEN, CHROMA_AXIOS_API_URL, CHROMA_COLLECTION_NAME } from '@/config/chroma';
 import { ChromaClient } from 'chromadb';
-import { JSONLoader } from "langchain/document_loaders/fs/json";
-
 
 export const run = async () => {
 
@@ -35,43 +33,39 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
       chunkOverlap: 200,
     });
 
+    const responseJsonString = JSON.stringify(responseData);
+    console.log('response', responseJsonString);
+
     // const docs = await textSplitter.splitDocuments(rawDocs); // splitting the document
-    const docs = await textSplitter.createDocuments(responseData); // creating the document from the response data
-    console.log('docs', docs    )
+    const docs = await textSplitter.createDocuments(responseJsonString); // creating the document from the response data
+    console.log('docs', docs, 'end docs'    )
 
     console.log('creating vector store...');
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
     console.log('embeddings ', embeddings    )
 
-    const CHROMA_COLLECTION_NAME = `axios-api-test-data`; // change this to the name of your collection on Chroma
-
-       let chroma = new Chroma(new OpenAIEmbeddings(), {
+    const chromaClientConfig = {
         index: new ChromaClient({
-            path: CHROMA_AWS_API_GATEWAY_URL,
-            fetchOptions: {
-                headers: {
-                  'X-Api-Key': CHROMA_AWS_API_TOKEN, // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
-                }
-              }
-        }),
-      collectionName: CHROMA_COLLECTION_NAME, });
+          path: CHROMA_AWS_API_GATEWAY_URL,
+          fetchOptions: {
+            headers: {
+              'X-Api-Key': CHROMA_AWS_API_TOKEN, // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
+            },
+        } as RequestInit,
+      }),
+        collectionName: 'Deals_of_the_Month',
+      };
+
+    const chroma = new Chroma(new OpenAIEmbeddings(), chromaClientConfig);
     await chroma.index?.reset();
 
     for (let i = 0; i < docs.length; i += 100) {
         const batch = docs.slice(i, i + 100);
-        await Chroma.fromDocuments(batch, embeddings, {
-            index: new ChromaClient({
-                path: CHROMA_AWS_API_GATEWAY_URL,
-                fetchOptions: {
-                    headers: {
-                        'x-api-key': CHROMA_AWS_API_TOKEN, // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
-                    }
-                  }
-            }),
-          collectionName: CHROMA_COLLECTION_NAME,
-        });
+        await Chroma.fromDocuments(batch, new OpenAIEmbeddings(), chromaClientConfig);
       }
+
+
 
   } catch (error) {
     console.log('error', error);

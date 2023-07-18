@@ -3,15 +3,20 @@ import { loadVectorStore } from '@/utils/loadVectorStore';
 import { makeChain } from '@/utils/makechain';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { CHROMA_AWS_API_GATEWAY_URL, CHROMA_AWS_API_TOKEN } from '@/config/chroma';
+import { CHROMA_AWS_API_GATEWAY_URL, CHROMA_AWS_API_TOKEN, CHROMA_COLLECTION_NAME } from '@/config/chroma';
 import { AIMessage, HumanMessage } from 'langchain/schema';
 import { ChromaClient } from 'chromadb';
+
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   const { question, history } = req.body; // extract question and history from the request body
+
+  if (!CHROMA_AWS_API_GATEWAY_URL || !CHROMA_AWS_API_TOKEN) {
+    throw new Error('CHROMA_AWS_API_GATEWAY_URL or CHROMA_AWS_API_TOKEN is not set in the environment variables');
+  }
 
   console.log('question', question);
   console.log('history', history);
@@ -29,7 +34,6 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
-    const CHROMA_COLLECTION_NAME = 'axios-api-test-data'; // change this to the name of your collection on Chroma
 
     const vectorStore = await Chroma.fromExistingCollection(
         new OpenAIEmbeddings({}),
@@ -39,9 +43,9 @@ export default async function handler(
                 headers: {
                   'X-Api-Key': CHROMA_AWS_API_TOKEN, // Check with what the Gateway expects, typically is X-Api-Key, validated via Postman first using GET /api/v1/heartbeat endpoint to see if you can reach
                 },
-            } as RequestInit, // explicitly type fetchOptions as RequestInit
-          }),
-          collectionName: CHROMA_COLLECTION_NAME,
+                },
+            }),
+          collectionName: 'Deals_of_the_Month',
         },
       );
 
