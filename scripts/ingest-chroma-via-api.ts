@@ -9,9 +9,8 @@ import { JSONLoader } from "langchain/document_loaders/fs/json";
 
 export const run = async () => {
 
-/* API route to retrieve the documents */
+/* API route & Token to retrieve the documents */
 const apiUrl: string = CHROMA_AXIOS_API_URL!;
-// const apiUrl: string = CHROMA_AXIOS_API_URL ?? 'https://default.url/api/v1/ingest';
 const apiToken = CHROMA_AXIOS_API_TOKEN;
 
   try {
