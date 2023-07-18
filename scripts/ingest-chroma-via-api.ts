@@ -1,16 +1,17 @@
 import axios from 'axios';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { Chroma } from 'langchain/vectorstores/chroma';
 import { CHROMA_AWS_API_GATEWAY_URL, CHROMA_AWS_API_TOKEN, CHROMA_AXIOS_API_TOKEN, CHROMA_AXIOS_API_URL } from '@/config/chroma';
 import { ChromaClient } from 'chromadb';
+import { JSONLoader } from "langchain/document_loaders/fs/json";
 
 
 export const run = async () => {
 
 /* API route to retrieve the documents */
-const apiUrl: string = CHROMA_AXIOS_API_URL ?? 'https://default.url/api/v1/ingest';
+const apiUrl: string = CHROMA_AXIOS_API_URL!;
+// const apiUrl: string = CHROMA_AXIOS_API_URL ?? 'https://default.url/api/v1/ingest';
 const apiToken = CHROMA_AXIOS_API_TOKEN;
 
   try {
@@ -27,20 +28,24 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
       });
       const responseData = response.data;
 
+    //  const loader = new JSONLoader(responseData); - if json is sitting in directory statically
+
     /* Split text into chunks */
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
     });
 
-    const docs = await textSplitter.splitDocuments(responseData);
-    console.log('split docs', docs);
+    // const docs = await textSplitter.splitDocuments(rawDocs); // splitting the document
+    const docs = await textSplitter.createDocuments(responseData); // creating the document from the response data
+    console.log('docs', docs    )
 
     console.log('creating vector store...');
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
+    console.log('embeddings ', embeddings    )
 
-    const CHROMA_COLLECTION_NAME = `${responseData?.store ?? 'store'} axios-api-data`; // change this to the name of your collection on Chroma
+    const CHROMA_COLLECTION_NAME = `axios-api-test-data`; // change this to the name of your collection on Chroma
 
        let chroma = new Chroma(new OpenAIEmbeddings(), {
         index: new ChromaClient({
