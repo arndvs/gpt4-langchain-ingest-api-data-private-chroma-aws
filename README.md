@@ -1,6 +1,6 @@
 # GPT-4, LangChain, Private Chroma DB Deployed to AWS, Ingesting Data Via API
 
-Tech stack used includes LangChain, Private Chroma DB Deployed to AWS, Typescript, Openai, and Next.js. LangChain is a framework that makes it easier to build scalable AI/LLM apps and chatbots. Pinecone is a vectorstore for storing embeddings and your PDF in text to later retrieve similar docs.
+Tech stack used includes LangChain, Private Chroma DB Deployed to AWS, Typescript, Openai, and Next.js. LangChain is a framework that makes it easier to build scalable AI/LLM apps and chatbots. Chroma is an opensource vectorstore for storing embeddings and your API data.
 
 [How to Deploy Private Chroma Vector DB to AWS video](https://www.youtube.com/watch?v=rD3G3hbAawE)
 
