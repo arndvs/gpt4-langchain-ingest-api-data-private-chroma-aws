@@ -45,7 +45,7 @@ export default async function handler(
                 },
                 },
             }),
-          collectionName: 'Deals_of_the_Month',
+          collectionName: CHROMA_COLLECTION_NAME,
         },
       );
 

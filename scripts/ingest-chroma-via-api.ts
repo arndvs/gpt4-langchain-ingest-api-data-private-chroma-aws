@@ -25,6 +25,8 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
       });
       const responseData = response.data;
 
+      console.log('response', responseData, 'end response');
+
     //  const loader = new JSONLoader(responseData); - if json is sitting in directory statically
 
     /* Split text into chunks */
@@ -36,7 +38,9 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
     const responseJsonString = JSON.stringify(responseData);
     console.log('response', responseJsonString);
 
-    const docs = await textSplitter.createDocuments(responseJsonString); // creating the document from the response data
+    const test = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
+    const docs = await textSplitter.createDocuments([responseJsonString]); // pass in the json string
     console.log('docs', docs, 'end docs'    )
 
     console.log('creating vector store...');
@@ -53,7 +57,7 @@ const apiToken = CHROMA_AXIOS_API_TOKEN;
             },
         } as RequestInit,
       }),
-        collectionName: 'Deals_of_the_Month',
+        collectionName: CHROMA_COLLECTION_NAME,
       };
 
     const chroma = new Chroma(new OpenAIEmbeddings(), chromaClientConfig);
